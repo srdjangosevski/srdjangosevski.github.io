@@ -1,49 +1,35 @@
-var gulp = require('gulp');
-var minifyHTML = require('gulp-minify-html');
-var imagemin = require('gulp-imagemin');
-var inlinesource = require('gulp-inline-source');
-var runSequence = require('run-sequence');
-var deploy = require('gulp-gh-pages');
+const { series, watch, src, dest } = require('gulp')
+const minifyHTML = require('gulp-htmlmin')
+const imagemin = require('gulp-imagemin')
+const inlinesource = require('gulp-inline-source')
+const ghPages = require('gh-pages')
 
-// optimize images using imagemin
-gulp.task('imagemin', function () {
-    gulp.src('img/*')
+function images () {
+    return src('img/*')
         .pipe(imagemin({ optimizationLevel: 3, progressive: true, interlaced: true }))
-        .pipe(gulp.dest('public/img'))
-});
+        .pipe(dest('public/img'))
+}
 
-// Inline css
-gulp.task('inlinesource', function () {
-    var options = {
-        compress: true
-    };
+function inline () {
+    return src(['*.html', '!node_modules'])
+        .pipe(inlinesource({ compress: true }))
+        .pipe(dest('public'))
+}
 
-    return gulp.src(['*html', '!node_modules'])
-        .pipe(inlinesource(options))
-        .pipe(gulp.dest('public'));
-});
+function minify () {
+    return src('public/*.html')
+        .pipe(minifyHTML({ collapseWhitespace: true }))
+        .pipe(dest('public/'))
+}
 
-// Minify HTML
-gulp.task('minify-html', ['inlinesource'],function() {
-    var opts = {};
-    gulp.src('public/*html')
-    .pipe(minifyHTML(opts))
-    .pipe(gulp.dest('public/'))
-});
+function copy () {
+    return src('static/**/*')
+        .pipe(dest('public/'))
+}
 
-//copy (copy files to public folder)
-gulp.task('copy', function () {
-    gulp.src(['manifest.webmanifest', '*png', '*js', 'CNAME'])
-        .pipe(gulp.dest('public/'));
-});
+function deploy (cb) {
+    ghPages.publish('public', { branch: 'master' }, cb)
+}
 
-// Build
-gulp.task('build', function () {
-  runSequence('imagemin', 'minify-html', 'copy',function () {});
-});
-
-// Deploy to master
-gulp.task('deploy', ['build'], function () {
-    return gulp.src('public/**/*')
-        .pipe(deploy({ branch: 'master' }));
-});
+exports.build = series(images, inline, minify, copy)
+exports.deploy = deploy
