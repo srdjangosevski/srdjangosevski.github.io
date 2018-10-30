@@ -31,15 +31,9 @@ gulp.task('minify-html', ['inlinesource'],function() {
     .pipe(gulp.dest('public/'))
 });
 
-//copy (manifest, js and icons)
+//copy (copy files to public folder)
 gulp.task('copy', function () {
     gulp.src(['manifest.webmanifest', '*png', '*js', 'CNAME'])
-        .pipe(gulp.dest('public/'));
-});
-
-//copy icons
-gulp.task('copy-icons', function () {
-    gulp.src('*png')
         .pipe(gulp.dest('public/'));
 });
 
