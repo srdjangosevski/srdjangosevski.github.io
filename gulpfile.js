@@ -33,7 +33,7 @@ gulp.task('minify-html', ['inlinesource'],function() {
 
 //copy (manifest, js and icons)
 gulp.task('copy', function () {
-    gulp.src(['manifest.webmanifest', '*png', '*js'])
+    gulp.src(['manifest.webmanifest', '*png', '*js', 'CNAME'])
         .pipe(gulp.dest('public/'));
 });
 
